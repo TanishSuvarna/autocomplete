@@ -1,4 +1,4 @@
-import {getFI,getII,getWIS,getWIQ,getT} from '../index/indexes.js'
+import {getWIS,getWIQ,getT, getTFIDF} from '../index/indexes.js'
 
 
 const get = (total , wis , wiq,queries) => {
@@ -9,13 +9,12 @@ const get = (total , wis , wiq,queries) => {
 }
 export const solveTFIDF = () => {
     return new Promise((res , rej) => {
-        const FI = getFI();
-        const II = getII();
+        
         const WIS = getWIS();
         const WIQ = getWIQ();
         const queries = getT();
         try{
-            const TFIDF = {};
+            const TFIDF = getTFIDF();
             for(const [id , map] of Object.entries(WIS)){
                 TFIDF[id] = {};
                 let totalW = 0;
@@ -26,7 +25,7 @@ export const solveTFIDF = () => {
                     TFIDF[id][word] = get(totalW , freq , WIQ[word] , queries);
                 }
             }
-            res(TFIDF);
+            res();
         }
         catch(err){
             console.log(err);
@@ -34,3 +33,5 @@ export const solveTFIDF = () => {
         }
     })
 }
+
+

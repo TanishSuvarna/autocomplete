@@ -4,7 +4,8 @@ import {getFI,getII,getWIS,getWIQ,setT} from '../index/indexes.js'
 
 
 
-const removeNonAlphanumeric = (string) => {
+export const removeNonAlphanumeric = (string) => {
+    if(!string) return "";
     return string.replace(/[^a-z0-9]/gi, '');
 }
 const index = async (stemmedTokens , id, WIS , WIQ ,FI ,II) => {
@@ -69,16 +70,22 @@ const stem = (statement) => {
         const tokens = tokenizer.tokenize(statement);
 
         // Remove stopwords
-        
-        const filteredTokens = tokens.filter((token) => {
+        const tokensAL = tokens.map((token) => {
             token  = removeNonAlphanumeric(token);
-            return !stopwords.includes(token.toLowerCase());
+            
+            return token; 
         })
-
+        const tokensTrue = tokensAL.filter((token) => token.length !== 0);
+        const tokensL = tokensTrue.map((token) => {
+            return token.toLowerCase();
+        })
+        
+        const filteredTokens = tokensL.filter((token) => {
+            return token.length !== 0 && (!stopwords.includes(token) || token.length === 1);
+        })
         // Perform stemming on each token
         const stemmer = natural.PorterStemmer;
         const stemmedTokens = filteredTokens.map(token => stemmer.stem(token));
-
         return stemmedTokens;
     }
     
@@ -95,57 +102,59 @@ const getTitle = (statement , len) => {
     }
     return text;
 }
-export const preprocess = async (info) => {
+export const preprocess = async (sentence) => {
     return new Promise(async (res , rej) => {
-        const FI = getFI();
-        const II = getII();
-        const WIS = getWIS();
-        const WIQ = getWIQ();
-        if(!info){
-            let queries = 100;
-            setT(queries);
+        
             try{
-                
-                console.time('dataFromFile'); // Start the timer
-                let data = await getData(queries);
-                console.timeEnd('dataFromFile'); // Start the timer
-                
-                console.time('forLoop'); // Start the timer
-                for(let query of data){
-                    let text = query.text;
+                if(!sentence){
+                    const FI = getFI();
+                    const II = getII();
+                    const WIS = getWIS();
+                    const WIQ = getWIQ();    
+                    let queries = 1000;
+                    setT(queries);
+                    console.time('dataFromFile'); // Start the timer
+                    let data = await getData(queries);
+                    console.timeEnd('dataFromFile'); // Start the timer
                     
-                    //Converting Description to title(test dataset)
-                    let title = getTitle(text , 60);
-                    //Stemming And Removing StopWords
-                    text = stem(text);
-                    
-                    //Inverted Indexing , Frequency Calc
-                    
-                    await index(text , query.id , WIS , WIQ ,FI ,II);
-
-                    // Storing Key Value Pairs , Key is the 'id' and value is the title
-                    FI[query.id] =  title;
-                }
-                
-                console.timeEnd('forLoop'); // Start the timer
-        
-                //total unique val
-                let total = 0;
-        
-                for(const [key , value] of Object.entries(II)){
+                    console.time('forLoop'); // Start the timer
+                    for(let query of data){
+                        let text = query.text;
                         
-                    total = parseInt(total) + parseInt(value.length); 
-                }
-                const keyCount = Object.keys(II).length;
-                console.log(parseInt(total)/parseInt(keyCount))
-                res();
+                        //Converting Description to title(test dataset)
+                        let title = getTitle(text , 60);
+                        //Stemming And Removing StopWords
+                        text = stem(text);
+                        
+                        //Inverted Indexing , Frequency Calc
+                        
+                        await index(text , query.id , WIS , WIQ ,FI ,II);
+
+                        // Storing Key Value Pairs , Key is the 'id' and value is the title
+                        FI[query.id] =  title;
+                    }
+                    
+                    console.timeEnd('forLoop'); // Start the timer
+            
+                    //total unique val
+                    let total = 0;
+            
+                    for(const [key , value] of Object.entries(II)){
+                            
+                        total = parseInt(total) + parseInt(value.length); 
+                    }
+                    const keyCount = Object.keys(II).length;
+                    console.log(parseInt(total)/parseInt(keyCount))
+                    res();
             }
+            else res(stem(sentence));
+        }
             catch(err){
                 console.log(err);
                 rej();
             }
         }
-    })
+    )
 }
 
 

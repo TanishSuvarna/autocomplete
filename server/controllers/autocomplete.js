@@ -6,7 +6,6 @@ export const sayHello = async(req , res,next) => {
 export const search = async(req , res,next) =>{
     const trie = getRoot();
     const {query} = req.body;
-    const out = trie.search(query);
-
-    res.status(200).json({exists : out});
+    const suggestions = await trie.search(query);
+    res.status(200).json({suggestions});
 }

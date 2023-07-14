@@ -1,18 +1,22 @@
 import { solveTFIDF } from "../weights/calculate.js";
+import { assignSuggestions } from "../trie/suggestions.js";
 import { preprocess } from "../preprocessing/preprocessor.js";
-import { getII } from "../index/indexes.js";
-import { getRoot } from "../index/indexes.js";
+import { getII ,getRoot } from "../index/indexes.js";
 export const init = async() => {
-    console.time("init time")
-    await preprocess();
-    await solveTFIDF();
-    const II = getII();
-    const trie = getRoot();
-    for(let word of Object.keys(II)){
-        trie.insert(word);
+    try{
+        console.time("init time")
+        await preprocess();
+        await solveTFIDF()
+        const II = getII();
+        const trie = getRoot();
+        for(let word of Object.keys(II , "")){
+            trie.insert(word);
+        }
+        await assignSuggestions(trie.root ,"",II)
+        // trie.traverse() //test 
+        console.timeEnd("init time")
     }
-    for(let word of Object.keys(II)){
-        trie.search(word);
+    catch(err){
+        console.log(err);
     }
-    console.timeEnd("init time")
 }

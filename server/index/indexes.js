@@ -6,6 +6,7 @@ const I_Index = {};
 const W_Index_Sentences = {};
 const W_Index_Queries = {};
 const root = new Trie();
+const TFIDF = {};
 let totalQueries = 0; 
 
 export const getFI = () => F_Index;
@@ -16,9 +17,8 @@ export const getRoot = () => root;
 export const getT = () =>{
     return totalQueries;
 }
+export const getTFIDF = () => TFIDF;
 export const setT = (queries) =>{
     totalQueries = queries;
 }
 
-
-// export const getData = () => I_Index;
