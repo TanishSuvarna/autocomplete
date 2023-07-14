@@ -102,7 +102,7 @@ export const preprocess = async (info) => {
         const WIS = getWIS();
         const WIQ = getWIQ();
         if(!info){
-            let queries = 100000;
+            let queries = 100;
             setT(queries);
             try{
                 
