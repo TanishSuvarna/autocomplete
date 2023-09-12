@@ -62,6 +62,7 @@ const index = async (stemmedTokens , id, WIS , WIQ ,FI ,II) => {
 
 const stem = (statement) => {
     if(statement){
+        
         const stopwords = natural.stopwords
 
 
@@ -86,11 +87,12 @@ const stem = (statement) => {
         // Perform stemming on each token
         const stemmer = natural.PorterStemmer;
         const stemmedTokens = filteredTokens.map(token => stemmer.stem(token));
+        // console.timeEnd("Stemming");
+
         return stemmedTokens;
     }
     
     else return "";
-
 }
 const getTitle = (statement , len) => {
     let text = "";
@@ -111,7 +113,7 @@ export const preprocess = async (sentence) => {
                     const II = getII();
                     const WIS = getWIS();
                     const WIQ = getWIQ();    
-                    let queries = 1000;
+                    let queries = 100000;
                     setT(queries);
                     console.time('dataFromFile'); // Start the timer
                     let data = await getData(queries);
@@ -147,7 +149,11 @@ export const preprocess = async (sentence) => {
                     console.log(parseInt(total)/parseInt(keyCount))
                     res();
             }
-            else res(stem(sentence));
+            else {
+                console.time("Stemming");
+                res(stem(sentence));
+                console.timeEnd("Stemming");
+            }
         }
             catch(err){
                 console.log(err);

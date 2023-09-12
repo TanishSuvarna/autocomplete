@@ -36,10 +36,11 @@ export class Trie {
         return new Promise(async (res , rej) => {
 
             try{
+                console.time("Search Trie");
                 sentence = await preprocess(sentence);
                 let currentNode = this.root;
-                let count = 0;
-                let suggestions = new Set();
+                let suggestions = new Map();
+                let keys = [];
                 for(let word of sentence){
                     
                         
@@ -52,39 +53,28 @@ export class Trie {
                         }
                         currentNode = currentNode.children[index]; //move to next char
                     }
+                    
+                    
+                    currentNode.pos.forEach(value => {
+                        //storing keys for fast lookup 
+                        if(suggestions.value === undefined) keys.push(value);
+                        suggestions[value] = (parseInt(suggestions[value])||0) + 1;
+                    });
+                    
+                    // if(!suggestions.size) break;
+                }
+                console.timeEnd("Search Trie");
 
-                    if(count == 0){
-                        currentNode.pos.forEach(value => {
-                            suggestions.add(value);
-                        });
-                    
-                    }
-                    else{
-                        const temp = [];
-                        currentNode.pos.forEach(value => {
-                            if(suggestions.has(value)){
-                                temp.push(value);
-                            }
-                        });
-                        suggestions = temp;
-                    }
-                    
-    
-                    
-                    if(!suggestions.size) break;
-                    count++; 
-                }   
-                    
-                    if(count == sentence.length){
-                        const s_with_weights = await addWeights(suggestions , sentence);
-                        const s_with_weights_sort = await sortSuggestions(s_with_weights);
+                        console.time("AddWeights");
+                        const s_with_weights = await addWeights(keys , suggestions , sentence);
+                        console.timeEnd("AddWeights");
+                        
+                        console.time("sorting with weights");
+                        const s_with_weights_sort = await sortSuggestions(keys , s_with_weights);
+                        console.timeEnd("sorting with weights");
+
                         res(s_with_weights_sort);
                     }
-                    else{
-                        res("");
-                    }
-                        
-                }
                 
                 
             catch(err){

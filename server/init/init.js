@@ -17,6 +17,8 @@ export const init = async() => {
         console.timeEnd("init time")
     }
     catch(err){
+        
         console.log(err);
     }
 }
+

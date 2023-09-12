@@ -1,6 +1,4 @@
 
-
-
 export const assignSuggestions = (root,prefix,II) => {
     return new Promise(async (resolve, reject) => {
         try {
